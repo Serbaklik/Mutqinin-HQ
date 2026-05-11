@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mutqinin HQ - Aplikasi Ujian</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .bottom-nav-shadow { box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05); background: white; }
+        .tap-effect:active { transform: scale(0.95); transition: transform 0.1s; }
+        .smooth-transition { transition: all 0.3s ease-in-out; }
+        
+        /* Floating Center Button */
+        .center-fab { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        
+        /* Alarm Animation */
+        @keyframes alarmPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); border-color: #ef4444; }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); border-color: #ef4444; }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); border-color: transparent; }
+        }
+        .is-alarming { animation: alarmPulse 1.5s infinite; background-color: #fee2e2 !important; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* CSS RESET: MEMATIKAN TEMA BAWAAN BLOGGER */
+        html, body { margin: 0 !important; padding: 0 !important; overflow: hidden !important; width: 100vw; height: 100vh; background-color: #f9fafb; }
+        #header-wrapper, #sidebar-wrapper, .footer-outer, .sidebar, .Header, .widget, .post-title, .post-header, .post-footer, .comments, .date-header, .feed-links { display: none !important; }
+        .post-body { margin: 0 !important; padding: 0 !important; border: none !important; }
+        .main-inner, .columns { padding-top: 0 !important; padding-bottom: 0 !important; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 h-screen flex flex-col overflow-hidden">
+
+<!-- SUPER WRAPPER: MENGAMBIL ALIH 100% LAYAR -->
+<div id="mutqinin-fullscreen-app" class="fixed top-0 left-0 w-full h-screen bg-gray-50 text-gray-800 flex flex-col z-[999999] overflow-hidden" style="font-family: 'Inter', sans-serif;">
+
+    <!-- HEADER (Center Logo, No border on 'in', Green Solid) -->
+    <header class="glass-panel sticky top-0 z-40 px-6 py-4 flex justify-center items-center shadow-sm">
+        <div class="flex items-center font-bold text-2xl tracking-tight text-gray-800 w-full justify-center">
+            Mutqin<span class="bg-emerald-500 text-white ml-px px-1.5 rounded leading-none flex items-center justify-center pb-1 pt-1.5 text-xl">in</span>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 overflow-y-auto pb-28 px-4 pt-6 relative" id="main-content">
+        
+        <!-- VIEW 1: BERANDA (SaaS Premium Style) -->
+        <div id="view-beranda" class="view-section">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Dashboard</h2>
+                    <p class="text-sm text-gray-500 font-medium mt-1">Yang Terhormat Semua Penguji Hafalan HQ!</p>
+                </div>
+                <div class="bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100 flex items-center shadow-sm">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></div>
+                    <span class="text-xs font-bold text-emerald-700">Live</span>
+                </div>
+            </div>
+
+            <!-- SaaS Metric Cards -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-2xl p-5 text-white shadow-lg shadow-emerald-200 relative overflow-hidden group tap-effect">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white opacity-10 rounded-full blur-2xl group-hover:scale-110 transition-transform"></div>
+                    <div class="flex justify-between items-start mb-3 relative z-10">
+                        <div class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/20 shadow-inner"><i class="fa-solid fa-users"></i></div>
+                    </div>
+                    <h3 class="text-4xl font-black mb-0 tracking-tight relative z-10" id="dash-total-santri">0</h3>
+                    <p class="text-emerald-100 text-[11px] font-bold uppercase tracking-wider mt-1 relative z-10">Total Santri</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 relative overflow-hidden group tap-effect">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center border border-blue-100"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <span class="bg-green-50 text-green-600 text-[10px] font-extrabold px-2 py-1 rounded-md border border-green-100 flex items-center"><i class="fa-solid fa-arrow-trend-up mr-1"></i> Aktif</span>
+                    </div>
+                    <h3 class="text-4xl font-black text-gray-800 mb-0 tracking-tight" id="dash-telah-diuji">0</h3>
+                    <p class="text-gray-400 text-[11px] font-bold uppercase tracking-wider mt-1">Sesi Ujian</p>
+                </div>
+            </div>
+
+            <!-- SaaS Analytics Panel (Distribution) -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 via-yellow-400 to-red-400"></div>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-gray-800 text-sm flex items-center"><i class="fa-solid fa-chart-pie text-indigo-500 mr-2 bg-indigo-50 p-1.5 rounded-lg"></i> Distribusi Nilai</h3>
+                    <button class="text-gray-400 hover:text-gray-600 transition-colors"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="group cursor-default">
+                        <div class="flex justify-between items-end mb-1.5">
+                            <span class="text-xs font-bold text-gray-700 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span> 90 - 100 <span class="text-gray-400 font-medium ml-1 truncate max-w-[100px]">(Mumtaz)</span>
+                            </span>
+                            <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 text-xs font-bold">45%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 45%"></div>
+                        </div>
+                    </div>
+                    <div class="group cursor-default">
+                        <div class="flex justify-between items-end mb-1.5">
+                            <span class="text-xs font-bold text-gray-700 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span> 70 - 89 <span class="text-gray-400 font-medium ml-1 truncate max-w-[100px]">(Jayyid Jid...)</span>
+                            </span>
+                            <span class="text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 text-xs font-bold">30%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-blue-400 to-blue-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 30%"></div>
+                        </div>
+                    </div>
+                    <div class="group cursor-default">
+                        <div class="flex justify-between items-end mb-1.5">
+                            <span class="text-xs font-bold text-gray-700 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span> 50 - 69 <span class="text-gray-400 font-medium ml-1 truncate max-w-[100px]">(Jayyid)</span>
+                            </span>
+                            <span class="text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-100 text-xs font-bold">15%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 15%"></div>
+                        </div>
+                    </div>
+                    <div class="group cursor-default">
+                        <div class="flex justify-between items-end mb-1.5">
+                            <span class="text-xs font-bold text-gray-700 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-orange-500 mr-2"></span> 30 - 49 <span class="text-gray-400 font-medium ml-1 truncate max-w-[100px]">(Maqbul)</span>
+                            </span>
+                            <span class="text-orange-700 bg-orange-50 px-2 py-0.5 rounded border border-orange-100 text-xs font-bold">7%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-orange-400 to-orange-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 7%"></div>
+                        </div>
+                    </div>
+                    <div class="group cursor-default">
+                        <div class="flex justify-between items-end mb-1.5">
+                            <span class="text-xs font-bold text-gray-700 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span> 10 - 29 <span class="text-gray-400 font-medium ml-1 truncate max-w-[100px]">(Dhaif)</span>
+                            </span>
+                            <span class="text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100 text-xs font-bold">3%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-red-400 to-red-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 3%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="switchView('view-setup-ujian')" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl shadow-xl shadow-gray-200/50 tap-effect flex items-center justify-center hover:bg-gray-800 transition-all border border-gray-800">
+                <i class="fa-solid fa-play text-emerald-400 mr-2 text-lg"></i> <span class="tracking-wide">Mulai Ujian Baru</span>
+            </button>
+        </div>
+
+        <!-- VIEW 2: INPUT SANTRI -->
+        <div id="view-santri" class="view-section hidden">
+            <h2 class="text-2xl font-extrabold mb-1 text-gray-800">Data Santri</h2>
+            <p class="text-sm text-gray-500 mb-6">Tambah biodata santri baru ke database.</p>
+
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Lengkap Santri</label>
+                    <input type="text" id="input-nama" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm capitalize" placeholder="Contoh: Abdullah bin Ahmad">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">NIS / ID Santri</label>
+                    <input type="number" id="input-nis" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm" placeholder="Contoh: 102938">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Halaqoh</label>
+                    <select id="input-halaqoh" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm disabled:opacity-70 disabled:bg-gray-200">
+                        <option value="">⏳ Mengambil data...</option>
+                    </select>
+                </div>
+                <button onclick="simpanSantri()" class="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-md shadow-emerald-200 tap-effect mt-2" id="btn-simpan-santri">
+                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Simpan ke Database
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 3: JADWAL -->
+        <div id="view-jadwal" class="view-section hidden">
+            <h2 class="text-2xl font-extrabold mb-1 text-gray-800">Jadwal Ujian</h2>
+            <p class="text-sm text-gray-500 mb-6">Atur jadwal dan alarm pengingat penguji.</p>
+
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6 space-y-4">
+                <h3 class="font-bold text-gray-800 border-b pb-2"><i class="fa-solid fa-calendar-plus text-emerald-500 mr-2"></i> Tambah Jadwal</h3>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Penguji</label>
+                    <input type="text" id="jadwal-penguji" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" placeholder="Contoh: Ustadz Ahmad">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Santri</label>
+                    <input type="text" id="jadwal-santri" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" placeholder="Contoh: Fulan bin Fulan">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal</label>
+                        <input type="date" id="jadwal-tanggal" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Jam Ujian</label>
+                        <input type="time" id="jadwal-waktu" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Peringatan Berbunyi</label>
+                    <select id="jadwal-peringatan" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                        <option value="5">5 Menit Sebelum Ujian</option>
+                        <option value="15">15 Menit Sebelum Ujian</option>
+                        <option value="30">30 Menit Sebelum Ujian</option>
+                        <option value="60">1 Jam Sebelum Ujian</option>
+                        <option value="120">2 Jam Sebelum Ujian</option>
+                        <option value="1440">1 Hari (24 Jam) Sebelum</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Ulangi Peringatan</label>
+                        <select id="jadwal-jumlah-peringatan" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                            <option value="1">1 Kali (Tanpa Ulang)</option>
+                            <option value="2">2 Kali</option>
+                            <option value="3">3 Kali</option>
+                            <option value="5">5 Kali</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Jeda Antar Alarm</label>
+                        <select id="jadwal-interval-peringatan" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                            <option value="1">1 Menit</option>
+                            <option value="2">2 Menit</option>
+                            <option value="5">5 Menit</option>
+                            <option value="10">10 Menit</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="simpanJadwal()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md shadow-blue-200 tap-effect mt-4">
+                    <i class="fa-solid fa-bell mr-2"></i> Buat Pengingat
+                </button>
+            </div>
+
+            <h3 class="font-bold text-gray-800 mb-3 ml-1"><i class="fa-solid fa-list-ol text-gray-400 mr-2"></i> Antrean Jadwal Mendatang</h3>
+            <div id="jadwal-list" class="space-y-3">
+                <!-- Data jadwal via JS -->
+            </div>
+        </div>
+
+        <!-- VIEW 4: SETUP UJIAN -->
+        <div id="view-setup-ujian" class="view-section hidden">
+            <h2 class="text-2xl font-extrabold mb-1 text-gray-800">Mulai Ujian</h2>
+            <p class="text-sm text-gray-500 mb-6">Pilih santri dan materi yang akan diujikan.</p>
+
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-5">
+                <div class="relative">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Cari Santri</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
+                        <input type="text" id="search-santri" class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" placeholder="Ketik nama santri..." autocomplete="off">
+                    </div>
+                    <div id="dropdown-santri" class="mt-2 max-h-32 overflow-y-auto hide-scrollbar hidden border border-gray-100 rounded-xl bg-white shadow-sm absolute w-full z-10"></div>
+                    <div class="mt-3 bg-emerald-50 p-3 rounded-lg flex justify-between items-center hidden border border-emerald-100" id="selected-santri-card">
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">Santri Terpilih</p>
+                            <p class="text-sm font-bold text-gray-800 mt-0.5" id="selected-santri-name">-</p>
+                        </div>
+                        <button onclick="resetSantri()" class="text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-times text-lg"></i></button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-end mb-2">
+                        <label class="block text-xs font-semibold text-gray-600">Pilih Juz <span class="bg-blue-50 text-blue-600 font-bold px-1.5 py-0.5 rounded text-[9px] uppercase ml-1">1 Juz Per Sesi</span></label>
+                    </div>
+                    
+                    <div class="grid grid-cols-5 gap-2" id="grid-juz">
+                        <!-- JS generated -->
+                    </div>
+                    <p class="text-center text-[11px] font-bold text-emerald-600 mt-3 bg-emerald-50 py-1.5 rounded-md border border-emerald-100" id="selected-juz-text">Belum ada Juz dipilih</p>
+                </div>
+
+                <button onclick="mulaiUjian()" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-200 tap-effect mt-2">
+                    <i class="fa-solid fa-microphone-lines mr-2"></i> Lanjutkan Penilaian
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 5: KONSOL PENILAIAN AKTIF -->
+        <div id="view-ujian-aktif" class="view-section hidden h-full flex flex-col relative">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-bold text-gray-800 leading-tight" id="ujian-santri-name">Nama Santri</h3>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5" id="ujian-juz-name">Juz Terpilih</p>
+                </div>
+                <button onclick="batalUjian()" class="w-10 h-10 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center font-bold tap-effect transition-colors border border-red-100">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-center -mt-10">
+                <p class="text-sm text-gray-400 font-bold mb-3 tracking-widest uppercase">Skor Saat Ini</p>
+                <div class="w-52 h-52 rounded-full bg-white border-[10px] border-emerald-500 flex items-center justify-center shadow-2xl shadow-emerald-200 mb-8 relative smooth-transition" id="score-circle">
+                    <span class="text-7xl font-black text-gray-800 tracking-tighter" id="display-score">100</span>
+                    
+                    <button onclick="undoScore()" class="absolute -bottom-5 bg-gray-800 text-white text-xs font-bold px-5 py-2 rounded-full shadow-lg tap-effect opacity-0 transition-opacity duration-300 border-2 border-white" id="btn-undo">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Batal
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 w-full max-w-sm">
+                    <button onclick="kurangiPoin(2, 'hafalan')" class="bg-red-50 hover:bg-red-100 text-red-700 rounded-2xl p-4 flex flex-col items-center justify-center tap-effect smooth-transition border border-red-200 shadow-sm">
+                        <span class="text-2xl font-black mb-1">-2</span>
+                        <span class="text-[10px] font-bold uppercase text-center">Hafalan<br>(Jali)</span>
+                    </button>
+                    <button onclick="kurangiPoin(1, 'tajwid')" class="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 rounded-2xl p-4 flex flex-col items-center justify-center tap-effect smooth-transition border border-yellow-200 shadow-sm">
+                        <span class="text-2xl font-black mb-1">-1</span>
+                        <span class="text-[10px] font-bold uppercase text-center">Tajwid<br>(Khafi)</span>
+                    </button>
+                    <button onclick="kurangiPoin(0.5, 'bantuan')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-2xl p-4 flex flex-col items-center justify-center tap-effect smooth-transition border border-blue-200 shadow-sm">
+                        <span class="text-2xl font-black mb-1">-0.5</span>
+                        <span class="text-[10px] font-bold uppercase text-center">Bantuan<br>(Teguran)</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-auto pt-4">
+                <button onclick="selesaiUjian()" id="btn-simpan-ujian" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-200 tap-effect text-lg flex items-center justify-center">
+                    <i class="fa-solid fa-check-double mr-2"></i> Simpan Nilai
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 6: REKAPITULASI -->
+        <div id="view-rekap" class="view-section hidden">
+            <h2 class="text-2xl font-extrabold mb-1 text-gray-800">Rekap Nilai</h2>
+            <p class="text-sm text-gray-500 mb-6">Hasil gabungan dan rata-rata ujian santri.</p>
+
+            <div class="space-y-3" id="rekap-list-container">
+                <div class="text-center py-8 border-2 border-dashed border-gray-200 rounded-2xl bg-white">
+                    <i class="fa-solid fa-folder-open text-3xl text-gray-300 mb-3"></i>
+                    <p class="text-xs font-semibold text-gray-400">Belum ada sesi ujian yang diselesaikan.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="glass-panel fixed bottom-0 w-full h-20 bottom-nav-shadow z-50 flex justify-around items-center px-2 pb-2">
+        <button onclick="switchView('view-beranda')" class="flex flex-col items-center justify-center w-16 text-gray-400 hover:text-emerald-600 transition-colors" id="nav-view-beranda">
+            <i class="fa-solid fa-house text-xl mb-1"></i>
+            <span class="text-[10px] font-semibold">Beranda</span>
+        </button>
+        <button onclick="switchView('view-santri')" class="flex flex-col items-center justify-center w-16 text-gray-400 hover:text-emerald-600 transition-colors" id="nav-view-santri">
+            <i class="fa-solid fa-user-plus text-xl mb-1"></i>
+            <span class="text-[10px] font-semibold">Santri</span>
+        </button>
+        
+        <div class="relative w-16 flex justify-center">
+            <button onclick="switchView('view-setup-ujian')" class="center-fab w-14 h-14 bg-emerald-500 rounded-full text-white flex flex-col items-center justify-center shadow-lg shadow-emerald-300 tap-effect border-4 border-white" id="nav-view-setup-ujian">
+                <i class="fa-solid fa-microphone text-xl"></i>
+            </button>
+            <span class="text-[10px] font-semibold text-gray-400 absolute bottom-0">Ujian</span>
+        </div>
+
+        <button onclick="switchView('view-jadwal')" class="flex flex-col items-center justify-center w-16 text-gray-400 hover:text-emerald-600 transition-colors" id="nav-view-jadwal">
+            <i class="fa-solid fa-calendar-days text-xl mb-1"></i>
+            <span class="text-[10px] font-semibold">Jadwal</span>
+        </button>
+        <button onclick="switchView('view-rekap')" class="flex flex-col items-center justify-center w-16 text-gray-400 hover:text-emerald-600 transition-colors" id="nav-view-rekap">
+            <i class="fa-solid fa-file-lines text-xl mb-1"></i>
+            <span class="text-[10px] font-semibold">Rekap</span>
+        </button>
+    </nav>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-2xl text-sm font-semibold transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center">
+        <i class="fa-solid fa-circle-info mr-2 text-emerald-400" id="toast-icon"></i>
+        <span id="toast-message">Notifikasi</span>
+    </div>
+
+</div> <!-- AKHIR SUPER WRAPPER -->
+
+    <script>
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwRcrUqAx70pcAi9U65Z_r6VqDZhM-pbtm8EsrYPb749mTo3WJiSMg9GYQXEzLcAhoj/exec";
+        let currentScore = 100;
+        let scoreHistory = [];
+        let schedules = [];
+        let selectedSantri = '';
+        let selectedJuz = null; 
+        let totalSantriMaster = 124; 
+        let rekapData = []; 
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateJuzGrid();
+            setupSearchSantri();
+            switchView('view-beranda');
+            tarikDataHalaqohDariSheets(); 
+            mulaiPemantauanJadwal();
+            updateDashboardStats();
+        });
+        
+        async function tarikDataHalaqohDariSheets() {
+            const dropdown = document.getElementById('input-halaqoh');
+            dropdown.innerHTML = '<option value="">⏳ Mengambil data Spreadsheet...</option>';
+            dropdown.disabled = true;
+
+            try {
+                const response = await fetch(SCRIPT_URL + "?action=get_halaqoh");
+                const result = await response.json();
+
+                dropdown.innerHTML = '<option value="">Pilih Halaqoh...</option>';
+                if (result.status === "Success" && Array.isArray(result.data) && result.data.length > 0) {
+                        result.data.forEach(nama => {
+                            dropdown.innerHTML += `<option value="${nama}">${nama}</option>`;
+                        });
+                } else {
+                    dropdown.innerHTML = '<option value="">Belum ada data halaqoh</option>';
+                }
+          } catch (error) {
+              dropdown.innerHTML = '<option value="">Gagal ambil data</option>';
+              console.error(error);
+          } finally {
+              dropdown.disabled = false;
+          }
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                if(btn.id !== 'nav-view-setup-ujian') {
+                    btn.classList.remove('text-emerald-600');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+
+            const activeBtn = document.getElementById('nav-' + viewId);
+            if(activeBtn && viewId !== 'view-setup-ujian' && viewId !== 'view-ujian-aktif') {
+                activeBtn.classList.remove('text-gray-400');
+                activeBtn.classList.add('text-emerald-600');
+            }
+            document.getElementById('main-content').scrollTop = 0;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-message').innerText = message;
+            
+            if(type === 'success') icon.className = 'fa-solid fa-circle-check mr-2 text-emerald-400';
+            else if(type === 'warning') icon.className = 'fa-solid fa-triangle-exclamation mr-2 text-yellow-400';
+            else icon.className = 'fa-solid fa-circle-info mr-2 text-blue-400';
+
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            setTimeout(() => toast.classList.add('opacity-0', 'translate-y-[-20px]'), 3000);
+        }
+
+        function updateDashboardStats() {
+            document.getElementById('dash-total-santri').innerText = totalSantriMaster;
+            document.getElementById('dash-telah-diuji').innerText = rekapData.length;
+        }
+
+        // --- SIMPAN SANTRI (POST) ---
+        function simpanSantri() {
+            const nama = document.getElementById('input-nama').value;
+            const nis = document.getElementById('input-nis').value;
+            const halaqoh = document.getElementById('input-halaqoh').value;
+
+            if(!nama || !nis || !halaqoh) {
+                showToast('Mohon lengkapi semua data formulir.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btn-simpan-santri');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Menyimpan...';
+            btn.disabled = true;
+
+            const payload = { action: 'simpan_santri', nis: nis, nama: nama, halaqoh: halaqoh };
+
+            // SAFE MODE
+            if (!SCRIPT_URL || SCRIPT_URL === "") {
+                setTimeout(() => {
+                    resetFormSantri(btn, originalText);
+                }, 800);
+                return;
+            }
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => resetFormSantri(btn, originalText))
+            .catch(err => {
+                showToast('Gagal terhubung ke Database', 'warning');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        function resetFormSantri(btn, originalText) {
+            document.getElementById('input-nama').value = '';
+            document.getElementById('input-nis').value = '';
+            document.getElementById('input-halaqoh').value = '';
+            totalSantriMaster++;
+            updateDashboardStats();
+            showToast('Santri berhasil ditambahkan!', 'success');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            switchView('view-setup-ujian');
+        }
+
+        async function setupSearchSantri() {
+            const input = document.getElementById('search-santri');
+            const dropdown = document.getElementById('dropdown-santri');
+
+            function tampilkanDropdown() {
+                dropdown.classList.remove('hidden');
+            }
+
+            function sembunyikanDropdown() {
+                dropdown.classList.add('hidden');
+            }
+
+            input.addEventListener('focus', tampilkanDropdown);
+            input.addEventListener('input', tampilkanDropdown);
+ 
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#search-santri') && !e.target.closest('#dropdown-santri')) {
+                    sembunyikanDropdown();
+                }
+            });
+
+            try {
+                const response = await fetch(SCRIPT_URL + "?action=get_santri");
+                const result = await response.json();
+
+                dropdown.innerHTML = '';
+
+                if (result.status === "Success" && Array.isArray(result.data) && result.data.length > 0) {
+                    result.data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'px-3 py-2 text-sm border-b cursor-pointer hover:bg-gray-50';
+                        div.textContent = `${item.nama} - ${item.halaqoh}`;
+                        div.onclick = () => pilihSantri(item.nama);
+                        dropdown.appendChild(div);
+                });
+                } else {
+                    dropdown.innerHTML = '<div class="px-3 py-2 text-sm text-gray-400">Belum ada data santri</div>';
+                }
+            } catch (error) {
+                dropdown.innerHTML = '<div class="px-3 py-2 text-sm text-red-400">Gagal memuat data santri</div>';
+                console.error(error);
+            }
+        }   
+
+        function pilihSantri(nama) {
+            selectedSantri = nama;
+            document.getElementById('search-santri').value = '';
+            document.getElementById('search-santri').parentElement.classList.add('hidden');
+            document.getElementById('dropdown-santri').classList.add('hidden');
+            document.getElementById('selected-santri-name').innerText = nama;
+            document.getElementById('selected-santri-card').classList.remove('hidden');
+        }
+
+        function resetSantri() {
+            selectedSantri = '';
+            document.getElementById('selected-santri-card').classList.add('hidden');
+            document.getElementById('search-santri').parentElement.classList.remove('hidden');
+        }
+
+        function generateJuzGrid() {
+            const grid = document.getElementById('grid-juz');
+            grid.innerHTML = '';
+            for(let i=1; i<=30; i++) {
+                const btn = document.createElement('button');
+                btn.id = 'btn-juz-' + i;
+                btn.className = 'py-2 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors bg-white tap-effect';
+                btn.innerText = i;
+                btn.onclick = () => pilihJuz(i);
+                grid.appendChild(btn);
+            }
+        }
+
+        function pilihJuz(num) {
+            selectedJuz = num;
+            for(let i=1; i<=30; i++) {
+                const btn = document.getElementById('btn-juz-' + i);
+                if(btn) {
+                    btn.classList.remove('bg-emerald-500', 'text-white', 'border-emerald-500', 'shadow-md');
+                    btn.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+                }
+            }
+            const btnTerpilih = document.getElementById('btn-juz-' + num);
+            btnTerpilih.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+            btnTerpilih.classList.add('bg-emerald-500', 'text-white', 'border-emerald-500', 'shadow-md');
+            
+            const textEl = document.getElementById('selected-juz-text');
+            textEl.innerText = "Terpilih: Juz " + selectedJuz;
+            textEl.className = "text-center text-[11px] font-bold text-emerald-700 mt-3 bg-emerald-100 py-1.5 rounded-md border border-emerald-200";
+        }
+
+        // --- JADWAL & TTS LOGIC ---
+        function simpanJadwal() {
+            const penguji = document.getElementById('jadwal-penguji').value;
+            const santri = document.getElementById('jadwal-santri').value;
+            const tanggal = document.getElementById('jadwal-tanggal').value;
+            const waktu = document.getElementById('jadwal-waktu').value;
+            const peringatanMnt = parseInt(document.getElementById('jadwal-peringatan').value);
+            const jmlPeringatan = parseInt(document.getElementById('jadwal-jumlah-peringatan').value);
+            const intervalPeringatan = parseInt(document.getElementById('jadwal-interval-peringatan').value);
+
+            if(!penguji || !santri || !tanggal || !waktu) {
+                showToast('Lengkapi data jadwal (Tanggal & Jam wajib)', 'warning');
+                return;
+            }
+
+            const targetDateStr = `${tanggal}T${waktu}:00`;
+            const targetTime = new Date(targetDateStr).getTime();
+            const alarmTime = targetTime - (peringatanMnt * 60000);
+
+            let peringatanTeks = peringatanMnt + " Menit";
+            if(peringatanMnt === 60) peringatanTeks = "1 Jam";
+            if(peringatanMnt === 120) peringatanTeks = "2 Jam";
+            if(peringatanMnt === 1440) peringatanTeks = "1 Hari";
+
+            const jadwalBaru = {
+                id: Date.now(), penguji, santri, tanggal, waktu, peringatanMnt, peringatanTeks,
+                targetTime, alarmTime, nextAlarmTime: alarmTime,
+                totalPeringatan: jmlPeringatan, intervalPeringatan: intervalPeringatan * 60000,
+                peringatanCount: 0, isAlarmTriggered: false
+            };
+
+            schedules.push(jadwalBaru);
+            document.getElementById('jadwal-penguji').value = '';
+            document.getElementById('jadwal-santri').value = '';
+            showToast('Jadwal & Pengingat ditambahkan!', 'success');
+            renderJadwal();
+        }
+
+        function renderJadwal() {
+            const container = document.getElementById('jadwal-list');
+            container.innerHTML = '';
+            
+            if(schedules.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-400 text-center py-4 border-2 border-dashed rounded-xl">Belum ada antrean jadwal.</p>';
+                return;
+            }
+
+            schedules.sort((a, b) => a.targetTime - b.targetTime);
+            schedules.forEach(j => {
+                const dateObj = new Date(j.targetTime);
+                const dateDisplay = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                const alertInfo = j.totalPeringatan > 1 ? ` (${j.peringatanCount}/${j.totalPeringatan}x)` : '';
+
+                const card = document.createElement('div');
+                card.className = `bg-white border border-gray-200 rounded-xl p-4 flex justify-between items-center transition-all ${j.isAlarmTriggered ? 'is-alarming' : ''}`;
+                card.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 shrink-0"><i class="fa-regular fa-clock"></i></div>
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm">${j.santri}</h4>
+                            <p class="text-[11px] text-gray-500 font-medium">Penguji: ${j.penguji}</p>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-semibold">${dateDisplay} | ${j.waktu}</span>
+                                <span class="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md"><i class="fa-solid fa-bell mr-1"></i>${j.peringatanTeks}${alertInfo}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="hapusJadwal(${j.id})" class="text-red-400 hover:text-red-600 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function hapusJadwal(id) {
+            schedules = schedules.filter(j => j.id !== id);
+            renderJadwal();
+        }
+
+        function mulaiPemantauanJadwal() {
+            setInterval(() => {
+                const now = Date.now();
+                schedules.forEach(j => {
+                    if (j.peringatanCount < j.totalPeringatan && now >= j.nextAlarmTime && now < j.targetTime) {
+                        triggerAlarm(j);
+                    }
+                });
+            }, 10000); 
+        }
+
+        function triggerAlarm(jadwalObj) {
+            jadwalObj.isAlarmTriggered = true;
+            jadwalObj.peringatanCount++;
+            if (jadwalObj.peringatanCount < jadwalObj.totalPeringatan) {
+                jadwalObj.nextAlarmTime = Date.now() + jadwalObj.intervalPeringatan;
+            }
+            renderJadwal();
+
+            if ('speechSynthesis' in window) {
+                let sisaPeringatan = jadwalObj.totalPeringatan - jadwalObj.peringatanCount;
+                let pengulanganTeks = jadwalObj.totalPeringatan > 1 ? (sisaPeringatan > 0 ? `Ini adalah peringatan ke ${jadwalObj.peringatanCount}. ` : `Ini adalah peringatan terakhir. `) : "";
+                
+                const msg = new SpeechSynthesisUtterance(`Pemberitahuan kepada Ustadz ${jadwalObj.penguji}, mohon bersiap. Ujian santri bernama ${jadwalObj.santri}, pada tanggal ${jadwalObj.tanggal}, akan segera dimulai. ${pengulanganTeks}`);
+                msg.lang = 'id-ID'; msg.rate = 0.9;
+                window.speechSynthesis.speak(msg);
+            } else {
+                showToast(`Panggilan untuk ${jadwalObj.penguji}!`, 'warning');
+            }
+
+            setTimeout(() => {
+                jadwalObj.isAlarmTriggered = false;
+                renderJadwal();
+            }, 15000);
+        }
+
+        function mulaiUjian() {
+            if(!selectedSantri || !selectedJuz) {
+                showToast("Pilih Santri dan Juz terlebih dahulu!", "warning");
+                return;
+            }
+            
+            document.getElementById('ujian-santri-name').innerText = selectedSantri;
+            document.getElementById('ujian-juz-name').innerText = "Sedang Diuji: Juz " + selectedJuz;
+
+            currentScore = 100;
+            scoreHistory = [];
+            updateScoreUI();
+            switchView('view-ujian-aktif');
+        }
+
+        function batalUjian() {
+            if(confirm("Batalkan sesi ujian ini?")) {
+                switchView('view-setup-ujian');
+            }
+        }
+
+        function kurangiPoin(point, type) {
+            if(currentScore - point < 0) return;
+            scoreHistory.push(currentScore);
+            currentScore -= point;
+            updateScoreUI();
+            
+            const circle = document.getElementById('score-circle');
+            circle.style.borderColor = type === 'hafalan' ? '#fca5a5' : (type === 'tajwid' ? '#fde047' : '#93c5fd');
+            circle.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                circle.style.borderColor = '#10b981';
+                circle.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        function undoScore() {
+            if(scoreHistory.length > 0) {
+                currentScore = scoreHistory.pop();
+                updateScoreUI();
+            }
+        }
+
+        function updateScoreUI() {
+            document.getElementById('display-score').innerText = Number.isInteger(currentScore) ? currentScore : currentScore.toFixed(1);
+            const btnUndo = document.getElementById('btn-undo');
+            if(scoreHistory.length > 0) btnUndo.classList.remove('opacity-0', 'pointer-events-none');
+            else btnUndo.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // --- SIMPAN NILAI UJIAN (POST) ---
+        function selesaiUjian() {
+            const btn = document.getElementById('btn-simpan-ujian');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Menyimpan...';
+            btn.disabled = true;
+
+            const payloadNilai = {
+                action: 'simpan_nilai',
+                santri: selectedSantri,
+                juz: selectedJuz,
+                score: currentScore
+            };
+
+            // SAFE MODE
+            if (!SCRIPT_URL || SCRIPT_URL === "") {
+                setTimeout(() => {
+                    eksekusiResetUjian(payloadNilai, btn);
+                }, 800);
+                return;
+            }
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payloadNilai)
+            })
+            .then(res => res.json())
+            .then(data => eksekusiResetUjian(payloadNilai, btn))
+            .catch(err => {
+                showToast('Gagal terhubung ke Database', 'warning');
+                btn.innerHTML = '<i class="fa-solid fa-check-double mr-2"></i> Simpan Nilai';
+                btn.disabled = false;
+            });
+        }
+
+        function eksekusiResetUjian(payload, btn) {
+            // 1. Simpan ke Rekap Lokal
+            rekapData.push({
+                santri: payload.santri,
+                juzStr: payload.juz.toString(),
+                score: payload.score,
+                timestamp: Date.now()
+            });
+
+            updateDashboardStats();
+            renderRekap();
+
+            showToast('Nilai disimpan! Silakan pilih Juz berikutnya.', 'success');
+            
+            // 2. Reset HANYA JUZ (Santri tetap bertahan)
+            selectedJuz = null;
+            for(let i=1; i<=30; i++) {
+                const btnJuz = document.getElementById('btn-juz-' + i);
+                if(btnJuz) {
+                    btnJuz.classList.remove('bg-emerald-500', 'text-white', 'border-emerald-500', 'shadow-md');
+                    btnJuz.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+                }
+            }
+            const textEl = document.getElementById('selected-juz-text');
+            textEl.innerText = "Belum ada Juz dipilih";
+            textEl.className = "text-center text-[11px] font-bold text-gray-400 mt-3 bg-gray-100 py-1.5 rounded-md border border-gray-200";
+
+            btn.innerHTML = '<i class="fa-solid fa-check-double mr-2"></i> Simpan Nilai';
+            btn.disabled = false;
+            switchView('view-setup-ujian');
+        }
+
+        function cetakPDF(namaSantri) {
+            showToast('Menyiapkan file PDF untuk ' + namaSantri + '...', 'info');
+            setTimeout(() => {
+                window.print(); // Memanggil dialog print browser bawaan (Bisa di save as PDF)
+            }, 1000);
+        }
+
+        function renderRekap() {
+            const container = document.getElementById('rekap-list-container');
+            if (rekapData.length === 0) return;
+
+            const groupedData = {};
+            rekapData.forEach(item => {
+                if (!groupedData[item.santri]) {
+                    groupedData[item.santri] = {
+                        santri: item.santri, totalScore: 0, sesiCount: 0, juzList: new Set(), lastDate: item.timestamp
+                    };
+                }
+                groupedData[item.santri].totalScore += item.score;
+                groupedData[item.santri].sesiCount += 1;
+                item.juzStr.split(', ').forEach(j => groupedData[item.santri].juzList.add(parseInt(j)));
+                if(item.timestamp > groupedData[item.santri].lastDate) groupedData[item.santri].lastDate = item.timestamp;
+            });
+
+            container.innerHTML = Object.values(groupedData).map(g => {
+                const avgScore = (g.totalScore / g.sesiCount);
+                const displayAvg = Number.isInteger(avgScore) ? avgScore : avgScore.toFixed(1);
+                const juzTerurut = Array.from(g.juzList).sort((a, b) => a - b).join(', ');
+                const dateStr = new Date(g.lastDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+                let colorClass = 'text-emerald-600 bg-emerald-100'; 
+                if(avgScore < 90 && avgScore >= 70) colorClass = 'text-blue-600 bg-blue-100'; 
+                else if(avgScore < 70 && avgScore >= 50) colorClass = 'text-yellow-600 bg-yellow-100'; 
+                else if(avgScore < 50) colorClass = 'text-red-600 bg-red-100'; 
+
+                return `
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex justify-between items-center transition-all">
+                    <div>
+                        <h4 class="font-bold text-gray-800 tracking-tight text-[15px] mb-1">${g.santri}</h4>
+                        <div class="flex items-center text-[10px] text-gray-500 font-medium mb-1.5">
+                            <span class="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-bold mr-2 border border-emerald-100">Juz ${juzTerurut}</span>
+                            <span>Diuji ${g.sesiCount}x</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400"><i class="fa-regular fa-calendar mr-1"></i> Terakhir: ${dateStr}</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="flex flex-col items-center">
+                            <span class="font-black text-2xl tracking-tighter ${colorClass.split(' ')[0]}">${displayAvg}</span>
+                            <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Rata-Rata</span>
+                        </div>
+                        <button onclick="cetakPDF('${g.santri}')" class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-100 transition-colors text-red-500 flex items-center justify-center tap-effect border border-red-100 shadow-sm">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
